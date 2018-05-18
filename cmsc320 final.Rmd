@@ -1,0 +1,119 @@
+---
+title: "Cmsc320 Final Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#   Ford GoBike in the Bay Area
+
+
+Ford GoBike is a regional public bicycle sharing system in the San Francisco Bay Area, California. Beginning operation in August 2013 as Bay Area Bike Share, the Ford GoBike system currently has 2,500 bicycles in 260 stations across San Francisco, East Bay and San Jose. Users can pick up a bike in San Francisco, Oakland, Berkeley, Emeryville or San Jose. Use it to commute to work or school, run errands and explore the city. When donw, end the ride by returning the bike to any station. 
+
+The goal of this analysis is to find out which time of day do most people ride bike.  How time do they ride the bke for? How can the company make more profit? 
+
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(plyr)
+theme_set(theme_bw())
+
+csv_file <- "2017-fordgobike-tripdata.csv"
+tidy_afford <- read_csv(csv_file) 
+tidy_afford$start_station_latitude = NULL
+tidy_afford$start_station_longitude = NULL
+tidy_afford$end_station_latitude = NULL
+tidy_afford$end_station_longitude = NULL
+tidy_afford
+  
+```
+
+
+The data frame above contains all the original attributes excerpt the infomation of latitude and longitude because we won't really need them in our analyses.
+
+First let's start with some little statiscal calculations. What is the average amount of time a user spends with a bike? What is the highest and lowest duration a user has spend with a bike? 
+
+```{r}
+avg_time = mean(tidy_afford$duration_sec)
+avg_time
+lowest_time = max(tidy_afford$duration_sec) 
+  
+lowest_time
+
+highest_time = min(tidy_afford$duration_sec) 
+
+highest_time
+
+```
+
+The average time a user spends with a bike is 1099.01 seconds which is approximeately 13 minutes. This results shows that the average of users do not use the bike to go far places. The places are within their zone and they probably use a bike because they want to exercise their muscles. 
+The maximum durationa a user has spend with a bike is 86369 seconds which is approximately one day. This is result could mean that a user maybe rented the bike for a day. A user who could have done that could a be tourist who wanted to get ot a lot of places throughout the dat, but didn't want to consistenly have to to book a bike when on the move. 
+
+
+
+In this next code, we want to find the majority of the people's age that use the bike sharing system. First I ommit the rows that do not contain the member birth year information. then I create a bar chart of occurences per memeber_birth year column. Thne I find the avearge birth year of the users. 
+
+```{r}
+temp = na.omit(tidy_afford)
+counts = table(temp$member_birth_year)
+barplot(counts, main= "Birth year occurence", xlab = "Birth Year", ylab = "Count") 
+
+av = mean(temp$member_birth_year)
+av
+
+```
+
+The bar chart above shows that the majority of users (who gave their birth year information tu Pro Gobike) were born between the year 1970 and 1993. These are the people between the age of 25 to 43 years old. This class of people is considered as the working class. A 25 year old user might have just gone out of college and uses the bike to get to wokr and a 43 year old person also bike to to work because he or she has enough energy. 
+The average birth year of those users is 1980. 
+
+
+Next we find the of the day at people ride the bike. This results will determine the type of activities these people might be doing. 
+First i separate the date-time data types and create a new colum of hours(we will just use the hours and drop the minutes). then a create a bar chart like the one above. 
+
+```{r}
+tidy_afford$HourStart = format(as.POSIXct(strptime(tidy_afford$start_time, "%Y-%m-%d %H:%M:%S", tz="")), format = "%H")
+
+tidy_afford
+
+count = table(tidy_afford$HourStart)
+barplot(count, main= "Start time occurence", xlab = "Start time Hour", ylab = "Count") 
+
+
+
+
+```
+
+
+Base on the results, the majority of the people who use the bike system use it during the hours of 7am and 7pm. This seems normal because the best to use a bike is during day time when you can see everything. The highest count is at 8 am and 5pm. This are the people that use the bike to go to work at 8am and go home at 5pm(17 in military time). These ones don't want to use their car maybe because there's no way to park in the areas.
+
+
+We do the same for the end time. 
+
+
+```{r}
+tidy_afford$HourEnd = format(as.POSIXct(strptime(tidy_afford$end_time, "%Y-%m-%d %H:%M:%S", tz="")), format = "%H")
+
+tidy_afford
+
+count = table(tidy_afford$HourEnd)
+barplot(count, main= "End Time occurence", xlab = "End time Hour", ylab = "Count") 
+
+
+```
+
+
+The highest occurence of end time happend between 8am 9am, 5pm and 6pm. The does make sense because when user get to work, they return the bike because they don't need it anymore.And one they get off work, they request the bike and return it as soon as they get home. The ones that request and return it during the day are more likely to be tourists.
+
+
+
+###Conclusion
+
+  Thoughout the anylisis, it was seen that most bike users ride the bike the early morning hours probably to get to work and in the late hours probably to get back home from work. It was also seen that the average time a person rides a bike is 13 minutes, which is understanble if they go to work that is not far from their home. So they save gas. 
+GoBike could increase their income by making the bikes more avaible in other areas of the bay. 
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
