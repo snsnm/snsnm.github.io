@@ -9,17 +9,25 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #   Ford GoBike in the Bay Area
 
+##Getting Started
+
+Before you begin, you will need to install a couple things. First, make sure you have download the data from https://www.fordgobike.com/system-data
+
+
+### Introduction
 
 Ford GoBike is a regional public bicycle sharing system in the San Francisco Bay Area, California. Beginning operation in August 2013 as Bay Area Bike Share, the Ford GoBike system currently has 2,500 bicycles in 260 stations across San Francisco, East Bay and San Jose. Users can pick up a bike in San Francisco, Oakland, Berkeley, Emeryville or San Jose. Use it to commute to work or school, run errands and explore the city. When donw, end the ride by returning the bike to any station. 
 
-The goal of this analysis is to find out which time of day do most people ride bike.  How time do they ride the bke for? How can the company make more profit? 
+The goal of this analysis is to find out which time of day do most people ride bike.  How much time do they ride the bike for?  How can the company make more profit? 
 
 
 
+####load the library and Data preparation
 ```{r}
 library(tidyverse)
 library(lubridate)
-library(plyr)
+
+library(dplyr)
 theme_set(theme_bw())
 
 csv_file <- "2017-fordgobike-tripdata.csv"
@@ -32,6 +40,7 @@ tidy_afford
   
 ```
 
+#####Analysis
 
 The data frame above contains all the original attributes excerpt the infomation of latitude and longitude because we won't really need them in our analyses.
 
@@ -109,11 +118,60 @@ barplot(count, main= "End Time occurence", xlab = "End time Hour", ylab = "Count
 The highest occurence of end time happend between 8am 9am, 5pm and 6pm. The does make sense because when user get to work, they return the bike because they don't need it anymore.And one they get off work, they request the bike and return it as soon as they get home. The ones that request and return it during the day are more likely to be tourists.
 
 
+Now we can examine the defference between between the amount of people there exits as a customer or subscriber. 
+
+
+```{r}
+
+counting <- tidy_afford %>%
+  filter(user_type %in% c("Customer", "Subscriber")) %>%
+           group_by( user_type) %>%
+           summarise(counts = n())
+counting
+
+
+
+
+```
+
+
+
+
+```{r}
+ggplot(counting, aes(x = user_type, y = counts) ) +
+  geom_bar(stat = "identity", fill = "steelblue", width=0.4
+    ) +
+  geom_text(aes(label=counts), vjust=1.6, color="white", size=4)+
+  theme_minimal()
+```
+This plot above shows that ther is a huge difference betwen the number of subscribers and the number of customer. The number of subscribers is high which is good because I'm sur ethe company would want people to subscribe. Being a subscriber means that you constantly use the bike for your activities. 
+
+
+The next analysis deals with the demographics.
+
+
+```{r}
+
+trip <- tidy_afford %>%
+  filter(user_type %in% c("Customer", "Subscriber"),) %>%
+           group_by(member_gender) %>%
+           summarise(counts = n())
+trip
+
+
+
+
+```
+It seems like more male ride bike than female.
+
+
+
 
 ###Conclusion
 
   Thoughout the anylisis, it was seen that most bike users ride the bike the early morning hours probably to get to work and in the late hours probably to get back home from work. It was also seen that the average time a person rides a bike is 13 minutes, which is understanble if they go to work that is not far from their home. So they save gas. 
 GoBike could increase their income by making the bikes more avaible in other areas of the bay. 
+The company should also try to target more females to gain more income. 
 
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
